@@ -12,7 +12,7 @@ type Tab = 'dashboard' | 'logger' | 'chat' | 'settings';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [apiKey, setApiKey] = useState<string>('');
+  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
 
   useEffect(() => {
     const storedKey = localStorage.getItem('gemini_api_key');
