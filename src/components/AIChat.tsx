@@ -252,7 +252,8 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
                   style={{ 
                     width: '40px', height: '40px', borderRadius: '50%', 
                     flexShrink: 0, boxShadow: 'var(--shadow-sm)', 
-                    border: '2px solid white', backgroundColor: 'white' 
+                    border: '2px solid white', backgroundColor: 'white',
+                    objectFit: 'cover'
                   }} 
                 />
               )}
@@ -301,7 +302,8 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
                 style={{ 
                   width: '40px', height: '40px', borderRadius: '50%', 
                   flexShrink: 0, boxShadow: 'var(--shadow-sm)', 
-                  border: '2px solid white', backgroundColor: 'white' 
+                  border: '2px solid white', backgroundColor: 'white',
+                  objectFit: 'cover'
                 }} 
               />
               <div style={{ 
