@@ -46,7 +46,7 @@ function App() {
       <header className="main-header">
         <div>
           <h1 className="header-title">
-            <img src="/favicon.png" alt="dog dumbbell" style={{ width: '40px', height: '40px', borderRadius: '50%', boxShadow: 'var(--shadow-sm)', objectFit: 'cover' }} />
+            <img src="/dog-icon.png" alt="dog dumbbell" style={{ width: '40px', height: '40px', borderRadius: '50%', boxShadow: 'var(--shadow-sm)', objectFit: 'cover' }} />
             Training Enhancer
           </h1>
           <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700 }}>🐾 No Pain No Cute 🐾</p>

@@ -245,7 +245,7 @@ const Dashboard: React.FC = () => {
       {/* AI Assistant Info Card */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1.25rem', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.85)', borderLeft: '4px solid var(--accent-primary)' }}>
         <div style={{ flexShrink: 0 }}>
-          <img src="/favicon.png" alt="AI Dog" style={{ width: '56px', height: '56px', borderRadius: '50%', boxShadow: 'var(--shadow-md)', border: '2px solid white', backgroundColor: 'white', objectFit: 'cover' }} />
+          <img src="/dog-icon.png" alt="AI Dog" style={{ width: '56px', height: '56px', borderRadius: '50%', boxShadow: 'var(--shadow-md)', border: '2px solid white', backgroundColor: 'white', objectFit: 'cover' }} />
         </div>
         <div>
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>

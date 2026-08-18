@@ -247,7 +247,7 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
             }}>
               {msg.role === 'model' && (
                 <img 
-                  src="/favicon.png" 
+                  src="/dog-icon.png" 
                   alt="AI" 
                   style={{ 
                     width: '40px', height: '40px', borderRadius: '50%', 
@@ -297,7 +297,7 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
           {isLoading && (
             <div style={{ display: 'flex', gap: '1rem', alignSelf: 'flex-start' }}>
               <img 
-                src="/favicon.png" 
+                src="/dog-icon.png" 
                 alt="AI" 
                 style={{ 
                   width: '40px', height: '40px', borderRadius: '50%', 
