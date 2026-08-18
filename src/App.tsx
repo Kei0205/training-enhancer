@@ -44,12 +44,12 @@ function App() {
   return (
     <>
       <header className="main-header">
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <img src="/favicon.png" alt="dog dumbbell" style={{ width: '56px', height: '56px', borderRadius: '50%', marginBottom: '0.5rem', boxShadow: 'var(--shadow-sm)', border: '2px solid white' }} />
-          <h1 className="header-title" style={{ justifyContent: 'center' }}>
+        <div>
+          <h1 className="header-title">
+            <img src="/favicon.png" alt="dog dumbbell" style={{ width: '40px', height: '40px', borderRadius: '50%', boxShadow: 'var(--shadow-sm)' }} />
             Training Enhancer
           </h1>
-          <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700, textAlign: 'center', width: '100%', marginTop: '0.25rem' }}>🐾 No Pain No Cute 🐾</p>
+          <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700 }}>🐾 No Pain No Cute 🐾</p>
         </div>
         
         <nav className="header-nav">
