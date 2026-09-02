@@ -42,55 +42,7 @@ const WorkoutLogger: React.FC = () => {
     await saveWorkout(newWorkout);
   };
 
-  const handleRestore = async () => {
-    if (!window.confirm("8月13日〜16日のバックアップデータを復元しますか？")) return;
-    const backup = [
-      {
-        "id": "c58ae506-31ff-4e75-80ae-f944685763ee",
-        "date": "2026-08-13",
-        "bodyPart": "胸",
-        "exercises": [
-          {"id": "cc9238a9-4750-4334-9cb6-fdb10a6eef72","name": "チェストプレス","sets": [{"weight": "75", "reps": 10}, {"weight": "75", "reps": 10}, {"weight": "75", "reps": 10}]},
-          {"id": "b856b674-c761-48a4-bee1-33de31fbd88c","name": "ラットプルダウン","sets": [{"weight": "77", "reps": 10}, {"weight": "77", "reps": 10}, {"weight": "77", "reps": 10}]},
-          {"id": "daae3fdc-5fd3-498b-9dc3-84602a6f8a6c","name": "シーテッドミッドロー","sets": [{"weight": "115", "reps": 10}, {"weight": "115", "reps": 10}, {"weight": "115", "reps": 10}]},
-          {"id": "672a325d-6cc3-4a9c-abbc-7d8affb9698a","name": "ディップマシン","sets": [{"weight": "70", "reps": 10}, {"weight": "70", "reps": 10}]}
-        ]
-      },
-      {
-        "id": "3f882fcc-3eba-484a-87cc-725b6730a40a",
-        "date": "2026-08-15",
-        "bodyPart": "足",
-        "exercises": [
-          {"id": "5e90c55d-c810-4eeb-baac-c14c579500e1","name": "スクワットマシン","sets": [{"weight": "45", "reps": 10}, {"weight": "45", "reps": 10}, {"weight": "45", "reps": 10}]},
-          {"id": "d7665b2b-f700-4289-ae1a-afae78192caf","name": "レッグカール","sets": [{"weight": "110", "reps": 10}, {"weight": "110", "reps": 10}, {"weight": "110", "reps": 10}]},
-          {"id": "2d5a3602-7855-4e4e-b66f-149c58bb6693","name": "インナータイ","sets": [{"weight": "90", "reps": 10}, {"weight": "90", "reps": 10}, {"weight": "90", "reps": 10}]}
-        ]
-      },
-      {
-        "id": "92a92d3f-7300-4cd2-ab4f-85e5c47b0788",
-        "date": "2026-08-16",
-        "bodyPart": "胸",
-        "exercises": [
-          {"id": "c70323e3-dc44-4363-9fd1-2a9d2067617f","name": "チェストプレス","sets": [{"weight": "80", "reps": 10}, {"weight": "80", "reps": 10}, {"weight": "80", "reps": 10}]},
-          {"id": "065f0b2c-d732-46b2-bc04-4be5cdfea678","name": "プリーチャーカール","sets": [{"weight": "45", "reps": 10}, {"weight": "45", "reps": 10}, {"weight": "45", "reps": 10}]},
-          {"id": "a56808f5-d9e8-47eb-af14-996236241119","name": "ケーブルプレスダウン","sets": [{"weight": "33", "reps": 10}, {"weight": "33", "reps": 10}, {"weight": "33", "reps": 10}]},
-          {"id": "066ee144-be79-45d2-9343-08e69549f54b","name": "ショルダープレス","sets": [{"weight": "55", "reps": 10}, {"weight": "55", "reps": 10}, {"weight": "55", "reps": 10}]},
-          {"id": "1e1281e4-d302-4197-b15c-d183f30f7e04","name": "デルトイドフライ","sets": [{"weight": "50", "reps": 10}, {"weight": "60", "reps": 10}, {"weight": "60", "reps": 10}]}
-        ]
-      }
-    ];
-    const current = [...workouts];
-    backup.forEach(b => {
-      if (!current.find(w => w.id === b.id)) {
-        current.push(b);
-      }
-    });
-    setWorkouts(current);
-    for (const b of backup) {
-      await saveWorkout(b);
-    }
-    alert("復元完了しました！");
-  };
+
 
   const handleDeleteWorkout = async (id: string) => {
     setWorkouts(workouts.filter(w => w.id !== id));
@@ -354,11 +306,8 @@ const WorkoutLogger: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Workout Logger</h2>
-        <button onClick={handleRestore} style={{ padding: '0.4rem 0.8rem', background: '#ffc107', color: '#000', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem' }}>
-          ⚠️ データを復元 (8月)
-        </button>
       </div>
 
       {renderCalendar()}

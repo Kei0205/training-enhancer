@@ -18,6 +18,17 @@ function App() {
     if (storedKey) {
       setApiKey(storedKey);
     }
+
+    // 自動で毎日の初回起動時にバックアップを取る（前日の状態を保存）
+    const today = new Date().toISOString().slice(0, 10);
+    const lastBackupDate = localStorage.getItem('auto_backup_date');
+    if (lastBackupDate !== today) {
+      const currentWorkouts = localStorage.getItem('training_workouts') || '[]';
+      const currentWeights = localStorage.getItem('training_weights') || '[]';
+      localStorage.setItem('auto_backup_workouts', currentWorkouts);
+      localStorage.setItem('auto_backup_weights', currentWeights);
+      localStorage.setItem('auto_backup_date', today);
+    }
   }, []);
 
   const handleSaveApiKey = (key: string) => {

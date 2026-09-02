@@ -64,6 +64,19 @@ const Dashboard: React.FC = () => {
     }).length;
   }, [workouts, currentMonthStart]);
 
+  const handleRestoreAutoBackup = () => {
+    const workouts = localStorage.getItem('auto_backup_workouts');
+    const weights = localStorage.getItem('auto_backup_weights');
+    const date = localStorage.getItem('auto_backup_date');
+    if (!workouts && !weights) { alert('自動バックアップデータがありません。明日以降に利用可能になります。'); return; }
+    if (window.confirm(`前回の起動時（${date}）のデータを復元しますか？\n⚠️現在のデータは上書きされ、間違えて消してしまった直前の状態に戻せます。`)) {
+      if (workouts) localStorage.setItem('training_workouts', workouts);
+      if (weights) localStorage.setItem('training_weights', weights);
+      alert('自動バックアップから復元しました！ページをリロードします。');
+      window.location.reload();
+    }
+  };
+
   const handleExportData = () => {
     const workouts = localStorage.getItem('training_workouts') || '[]';
     const weights = localStorage.getItem('training_weights') || '[]';
@@ -581,33 +594,46 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Backup Settings */}
-      <div className="glass-card" style={{ marginTop: '2rem' }}>
-        <h3 className="card-title" style={{ fontSize: '1.25rem' }}>
+      <div className="glass-card" style={{ marginTop: '2rem', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
+        <h3 className="card-title" style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Download className="h-6 w-6" style={{ color: '#0ea5e9' }} />
           データのバックアップ・復元
         </h3>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          スマホの中にある全データをファイルとして保存（エクスポート）し、いつでも復元できるようにします。
-        </p>
-
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <button className="action-button primary" onClick={handleExportData} style={{ background: '#0ea5e9', borderColor: '#0ea5e9' }}>
-            <Download size={18} />
-            バックアップを保存
+        
+        <div style={{ background: 'rgba(255,255,255,0.5)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1rem' }}>⏱️ 自動バックアップ（1日保存）</h4>
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem 0', fontSize: '0.9rem', lineHeight: 1.5 }}>
+            毎日アプリを開いた時に、自動的にその時点のデータが「1日前」として保存されます。間違えてデータを消してしまった場合は、ここから昨日の状態に戻せます。
+          </p>
+          <button className="action-button secondary" onClick={handleRestoreAutoBackup} style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)', fontWeight: 600 }}>
+            昨日の状態に復元する
           </button>
-          
-          <div>
-            <input 
-              type="file" 
-              accept=".json" 
-              id="import-file" 
-              style={{ display: 'none' }} 
-              onChange={handleImportData} 
-            />
-            <label htmlFor="import-file" className="action-button secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
-              <FileUp size={18} />
-              ファイルから復元
-            </label>
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.5)', padding: '1rem', borderRadius: '8px' }}>
+          <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1rem' }}>💾 手動エクスポート</h4>
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem 0', fontSize: '0.9rem', lineHeight: 1.5 }}>
+            全てのデータをスマホ本体にファイルとして保存します。
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button className="action-button primary" onClick={handleExportData} style={{ background: '#0ea5e9', borderColor: '#0ea5e9' }}>
+              <Download size={18} />
+              ファイルに保存
+            </button>
+            
+            <div>
+              <input 
+                type="file" 
+                accept=".json" 
+                id="import-file" 
+                style={{ display: 'none' }} 
+                onChange={handleImportData} 
+              />
+              <label htmlFor="import-file" className="action-button secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+                <FileUp size={18} />
+                ファイルから復元
+              </label>
+            </div>
           </div>
         </div>
       </div>
