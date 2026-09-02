@@ -130,9 +130,9 @@ const Dashboard: React.FC = () => {
     }, 0);
   };
 
-  const selectedWorkout = useMemo(() => {
-    if (!Array.isArray(workouts)) return undefined;
-    return workouts.find(w => w.date === format(selectedDate, 'yyyy-MM-dd'));
+  const selectedWorkouts = useMemo(() => {
+    if (!Array.isArray(workouts)) return [];
+    return workouts.filter(w => w.date === format(selectedDate, 'yyyy-MM-dd'));
   }, [selectedDate, workouts]);
 
   const volumeChartData = useMemo(() => {
@@ -182,24 +182,6 @@ const Dashboard: React.FC = () => {
       setIsWeightModalOpen(false);
       setNewWeight('');
     }
-  };
-
-  const getExerciseSummary = (workout: DailyWorkout) => {
-    if (!workout || !Array.isArray(workout.exercises)) return [];
-    return workout.exercises.map(ex => {
-      let maxWeight = 0;
-      let totalVol = 0;
-      if (Array.isArray(ex.sets)) {
-        ex.sets.forEach(set => {
-          if (!set) return;
-          const wStr = typeof set.weight === 'string' ? set.weight : String(set.weight || 0);
-          const w = parseFloat(wStr.replace(/[^0-9.]/g, '')) || 0;
-          if (w > maxWeight) maxWeight = w;
-          totalVol += w * set.reps;
-        });
-      }
-      return { name: ex.name || '不明な種目', maxWeight, totalVol };
-    });
   };
 
   const aiMessage = useMemo(() => {
@@ -477,24 +459,28 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {selectedWorkout ? (
+        {selectedWorkouts.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {getExerciseSummary(selectedWorkout).map((ex, i) => (
-              <div key={i} className="glass-card" style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{ex.name}</h4>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.2rem 0.5rem', backgroundColor: 'var(--accent-primary)', color: 'white', borderRadius: '4px' }}>
-                      {selectedWorkout.bodyPart}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    Total: {ex.totalVol.toLocaleString()} vol.
-                  </div>
+            {selectedWorkouts.map(workout => (
+              <div key={workout.id} className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    {workout.date.replace(/-/g, '/')} <span style={{ color: 'var(--accent-hover)', marginLeft: '0.5rem' }}>[{workout.bodyPart}]</span>
+                  </h3>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Max</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{ex.maxWeight} kg</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {workout.exercises.length === 0 ? (
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic', margin: 0 }}>No exercises added</p>
+                  ) : (
+                    workout.exercises.map(ex => (
+                      <div key={ex.id} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'baseline' }}>
+                        <strong style={{ color: 'var(--text-primary)' }}>{ex.name || 'Unnamed Exercise'}:</strong>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                          {ex.sets.map(s => `${s.weight}×${s.reps}`).join(', ')}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             ))}
