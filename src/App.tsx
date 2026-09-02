@@ -6,9 +6,8 @@ import './App.css';
 import Dashboard from './components/Dashboard';
 import WorkoutLogger from './components/WorkoutLogger';
 import AIChat from './components/AIChat';
-import Settings from './components/Settings';
 
-type Tab = 'dashboard' | 'logger' | 'chat' | 'settings';
+type Tab = 'dashboard' | 'logger' | 'chat';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -33,9 +32,7 @@ function App() {
       case 'logger':
         return <WorkoutLogger />;
       case 'chat':
-        return <AIChat apiKey={apiKey} onNavigateToLogger={() => setActiveTab('logger')} />;
-      case 'settings':
-        return <Settings apiKey={apiKey} onSave={handleSaveApiKey} />;
+        return <AIChat apiKey={apiKey} onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
       default:
         return <Dashboard />;
     }
@@ -73,13 +70,6 @@ function App() {
           >
             <span style={{ fontSize: '1.2rem', marginRight: '4px' }}>🐕</span>
             AI Trainer
-          </button>
-          <button 
-            className={`nav-button ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            <span style={{ fontSize: '1.2rem', marginRight: '4px' }}>⚙️</span>
-            Settings
           </button>
         </nav>
       </header>

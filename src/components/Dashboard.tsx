@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Share2, Plus, Calendar as CalendarIcon, LayoutList } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Plus, Calendar as CalendarIcon, LayoutList, Download, FileUp } from 'lucide-react';
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, subMonths, addMonths, subWeeks, addWeeks, parseISO, isValid } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from 'recharts';
@@ -63,6 +63,39 @@ const Dashboard: React.FC = () => {
       return isSameMonth(d, currentMonthStart);
     }).length;
   }, [workouts, currentMonthStart]);
+
+  const handleExportData = () => {
+    const workouts = localStorage.getItem('training_workouts') || '[]';
+    const weights = localStorage.getItem('training_weights') || '[]';
+    const data = { workouts: JSON.parse(workouts), weights: JSON.parse(weights) };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `training_enhancer_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (data.workouts) localStorage.setItem('training_workouts', JSON.stringify(data.workouts));
+        if (data.weights) localStorage.setItem('training_weights', JSON.stringify(data.weights));
+        alert('データをインポートしました！ページをリロードします。');
+        window.location.reload();
+      } catch (err) {
+        alert('不正なバックアップファイルです。');
+      }
+    };
+    reader.readAsText(file);
+  };
 
   // The 7 days of the week containing the selected date for the volume chart
   const selectedWeekDays = useMemo(() => {
@@ -547,6 +580,37 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Backup Settings */}
+      <div className="glass-card" style={{ marginTop: '2rem' }}>
+        <h3 className="card-title" style={{ fontSize: '1.25rem' }}>
+          <Download className="h-6 w-6" style={{ color: '#0ea5e9' }} />
+          データのバックアップ・復元
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
+          スマホの中にある全データをファイルとして保存（エクスポート）し、いつでも復元できるようにします。
+        </p>
+
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button className="action-button primary" onClick={handleExportData} style={{ background: '#0ea5e9', borderColor: '#0ea5e9' }}>
+            <Download size={18} />
+            バックアップを保存
+          </button>
+          
+          <div>
+            <input 
+              type="file" 
+              accept=".json" 
+              id="import-file" 
+              style={{ display: 'none' }} 
+              onChange={handleImportData} 
+            />
+            <label htmlFor="import-file" className="action-button secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', fontWeight: 600 }}>
+              <FileUp size={18} />
+              ファイルから復元
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

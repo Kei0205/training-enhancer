@@ -8,6 +8,7 @@ import { fetchWorkouts, fetchWeights, saveWorkout } from '../utils/supabaseApi';
 interface AIChatProps {
   apiKey: string;
   onNavigateToLogger: () => void;
+  onSaveApiKey?: (key: string) => void;
 }
 
 interface Message {
@@ -15,7 +16,7 @@ interface Message {
   content: string;
 }
 
-const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
+const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKey }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -319,6 +320,26 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger }) => {
               </div>
             </div>
           )}
+        {!apiKey && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', maxWidth: '400px', background: 'rgba(255,255,255,0.9)' }}>
+              <h4 style={{ margin: '0 0 1rem 0' }}>Google Gemini API Key が必要です</h4>
+              <input 
+                type="password" 
+                placeholder="AIzaSy..." 
+                style={{ width: '100%', marginBottom: '1rem', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc' }}
+                onChange={(e) => {
+                  if (e.target.value.length > 30 && onSaveApiKey) {
+                    onSaveApiKey(e.target.value);
+                  }
+                }}
+              />
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                入力すると自動的に保存されます。
+              </p>
+            </div>
+          </div>
+        )}
           <div ref={messagesEndRef} />
         </div>
 
