@@ -8,6 +8,9 @@ const BODY_PARTS = ['胸', '背中', '足', '肩・腕', '全身', 'オフ'];
 const WorkoutLogger: React.FC = () => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingIds, setEditingIds] = useState<Record<string, boolean>>({});
+
+  const toggleEdit = (id: string) => setEditingIds(prev => ({ ...prev, [id]: !prev[id] }));
 
   useEffect(() => {
     loadWorkouts();
@@ -29,6 +32,7 @@ const WorkoutLogger: React.FC = () => {
     };
     const newWorkouts = [newWorkout, ...workouts];
     setWorkouts(newWorkouts);
+    setEditingIds(prev => ({ ...prev, [newWorkout.id]: true }));
     await saveWorkout(newWorkout);
   };
 
@@ -184,7 +188,48 @@ const WorkoutLogger: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {workouts.map(workout => (
+        {workouts.map(workout => {
+          const isEditing = editingIds[workout.id];
+          
+          if (!isEditing) {
+            return (
+              <div key={workout.id} className="glass-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))', cursor: 'pointer' }} onClick={() => toggleEdit(workout.id)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    {workout.date.replace(/-/g, '/')} <span style={{ color: 'var(--accent-hover)', marginLeft: '0.5rem' }}>[{workout.bodyPart}]</span>
+                  </h3>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button 
+                      className="action-button secondary" 
+                      onClick={(e) => { e.stopPropagation(); handleCopy(workout); }}
+                      title="Copy in AI Format"
+                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
+                    >
+                      {copiedId === workout.id ? <Check size={16} className="text-success" style={{ color: 'var(--success)' }} /> : <Copy size={16} />}
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {workout.exercises.length === 0 ? (
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic', margin: 0 }}>No exercises added</p>
+                  ) : (
+                    workout.exercises.map(ex => (
+                      <div key={ex.id} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'baseline' }}>
+                        <strong style={{ color: 'var(--text-primary)' }}>{ex.name || 'Unnamed Exercise'}:</strong>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                          {ex.sets.map(s => `${s.weight}×${s.reps}`).join(', ')}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          return (
           <div key={workout.id} className="glass-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -220,6 +265,13 @@ const WorkoutLogger: React.FC = () => {
                   style={{ color: 'var(--warning)', borderColor: 'rgba(244, 63, 94, 0.2)' }}
                 >
                   <Trash2 size={18} />
+                </button>
+                <button 
+                  className="action-button primary" 
+                  onClick={() => toggleEdit(workout.id)} 
+                  title="Done Editing"
+                >
+                  <Check size={18} /> Done
                 </button>
               </div>
             </div>
@@ -294,7 +346,8 @@ const WorkoutLogger: React.FC = () => {
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
         
         {workouts.length === 0 && (
           <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
