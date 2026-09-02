@@ -76,17 +76,33 @@
 @media (max-width: 768px) {
   .main-header {
     flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    position: relative; /* Remove sticky on mobile to save space */
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+  }
+  
+  .header-title img {
+    width: 32px !important;
+    height: 32px !important;
   }
   
   .header-nav {
     width: 100%;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .nav-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
   }
   
   .dashboard-container {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
   }
 }

@@ -66,8 +66,16 @@ export const saveWorkout = async (workout: DailyWorkout): Promise<boolean> => {
     }, { onConflict: 'id' });
 
   if (error) {
-    console.error('Error saving workout:', error);
-    return false;
+    console.error('Error saving workout (falling back to local):', error);
+    const local = getLocalWorkouts();
+    const existingIndex = local.findIndex(w => w.id === workout.id);
+    if (existingIndex >= 0) {
+      local[existingIndex] = workout;
+    } else {
+      local.unshift(workout);
+    }
+    saveLocalWorkouts(local);
+    return true;
   }
   return true;
 };
@@ -86,8 +94,10 @@ export const deleteWorkout = async (id: string): Promise<boolean> => {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting workout:', error);
-    return false;
+    console.error('Error deleting workout (falling back to local):', error);
+    const local = getLocalWorkouts().filter(w => w.id !== id);
+    saveLocalWorkouts(local);
+    return true;
   }
   return true;
 };
@@ -157,8 +167,17 @@ export const saveWeight = async (weightLog: import('../types').BodyWeightLog): P
     }, { onConflict: 'date' }); // Use date as unique conflict key
 
   if (error) {
-    console.error('Error saving weight:', error);
-    return false;
+    console.error('Error saving weight (falling back to local):', error);
+    const local = getLocalWeights();
+    const existingIndex = local.findIndex(w => w.date === weightLog.date);
+    if (existingIndex >= 0) {
+      local[existingIndex] = weightLog;
+    } else {
+      local.push(weightLog);
+      local.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+    saveLocalWeights(local);
+    return true;
   }
   return true;
 };
