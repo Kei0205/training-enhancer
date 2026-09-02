@@ -331,7 +331,11 @@ const WorkoutLogger: React.FC = () => {
             <button className="action-button secondary" style={{ padding: '0.5rem' }} onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
               <ChevronLeft size={20} />
             </button>
-            <button className="action-button secondary" style={{ padding: '0.5rem' }} onClick={() => setCurrentMonth(new Date())}>
+            <button className="action-button secondary" style={{ padding: '0.5rem' }} onClick={() => {
+              const now = new Date();
+              setCurrentMonth(now);
+              setSelectedDate(now);
+            }}>
               Today
             </button>
             <button className="action-button secondary" style={{ padding: '0.5rem' }} onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
