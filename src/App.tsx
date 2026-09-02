@@ -49,15 +49,22 @@ function App() {
     }
   };
 
+const APP_VERSION = 'v1.1.0';
+
   return (
     <>
       <header className="main-header">
         <div>
-          <h1 className="header-title">
-            <img src="/dog-icon.png" alt="dog dumbbell" style={{ width: '40px', height: '40px', borderRadius: '50%', boxShadow: 'var(--shadow-sm)', objectFit: 'cover' }} />
-            Training Enhancer
-          </h1>
-          <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700 }}>🐾 No Pain No Cute 🐾</p>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <h1 className="header-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <img src="/dog-icon.png" alt="dog dumbbell" style={{ width: '40px', height: '40px', borderRadius: '50%', boxShadow: 'var(--shadow-sm)', objectFit: 'cover' }} />
+              Training Enhancer
+            </h1>
+            <span style={{ position: 'absolute', bottom: '-2px', right: '-32px', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {APP_VERSION}
+            </span>
+          </div>
+          <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700, marginTop: '0.5rem' }}>🐾 No Pain No Cute 🐾</p>
         </div>
         
         <nav className="header-nav">
