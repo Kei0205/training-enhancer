@@ -6,6 +6,13 @@ import { fetchWorkouts, saveWorkout, deleteWorkout } from '../utils/supabaseApi'
 
 const BODY_PARTS = ['胸', '背中', '足', '肩・腕', '全身', 'オフ'];
 
+const EXERCISE_SUGGESTIONS: Record<string, string[]> = {
+  '胸': ['チェストプレス', 'ベンチプレス', 'インクラインベンチプレス', 'ペックフライ', 'ケーブルクロスオーバー', 'ディップマシン'],
+  '背中': ['ラットプルダウン', 'シーテッドロー', 'ベントオーバーロー', 'デッドリフト', 'チンニング', 'ローロー', 'シーテッドミッドロー'],
+  '足': ['スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'カーフレイズ', 'インナータイ', 'アウタータイ', 'スクワットマシン'],
+  '肩・腕': ['ショルダープレス', 'サイドレイズ', 'フロントレイズ', 'プリーチャーカール', 'ダンベルカール', 'ケーブルプレスダウン', 'フレンチプレス', 'デルトイドフライ'],
+  '全身': ['バーピー', 'クリーン', 'スナッチ'],
+};
 const WorkoutLogger: React.FC = () => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -408,13 +415,6 @@ const WorkoutLogger: React.FC = () => {
                     >
                       <Trash2 size={18} />
                     </button>
-                    <button 
-                      className="action-button primary" 
-                      onClick={() => toggleEdit(workout.id)} 
-                      title="Done Editing"
-                    >
-                      <Check size={18} /> Done
-                    </button>
                   </div>
                 </div>
 
@@ -430,11 +430,17 @@ const WorkoutLogger: React.FC = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                         <input
                           type="text"
+                          list={`exercises-for-${workout.id}`}
                           placeholder="Exercise Name (e.g. Bench Press)"
                           value={exercise.name}
                           onChange={e => handleUpdateExercise(workout.id, exercise.id, e.target.value)}
                           style={{ flex: 1, marginRight: '1rem', fontWeight: 600, fontSize: '1.05rem', padding: '0.5rem 0.75rem' }}
                         />
+                        <datalist id={`exercises-for-${workout.id}`}>
+                          {(EXERCISE_SUGGESTIONS[workout.bodyPart] || []).map(suggestion => (
+                            <option key={suggestion} value={suggestion} />
+                          ))}
+                        </datalist>
                         <button 
                           onClick={() => handleDeleteExercise(workout.id, exercise.id)} 
                           style={{ color: 'var(--text-muted)', background: 'transparent', padding: '0.4rem', borderRadius: '50%' }}
@@ -485,6 +491,14 @@ const WorkoutLogger: React.FC = () => {
                   >
                     <Plus size={18} />
                     Add Exercise
+                  </button>
+                  <button 
+                    className="action-button primary" 
+                    onClick={() => toggleEdit(workout.id)} 
+                    title="Done Editing"
+                    style={{ width: '100%', marginTop: '0.5rem', padding: '0.75rem' }}
+                  >
+                    <Check size={18} /> Done
                   </button>
                 </div>
               </div>
