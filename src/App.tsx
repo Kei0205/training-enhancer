@@ -11,6 +11,7 @@ type Tab = 'dashboard' | 'logger' | 'chat';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [unit, setUnit] = useState<'lbs' | 'kg'>(() => (localStorage.getItem('preferred_unit') as 'lbs' | 'kg') || 'lbs');
   const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_GEMINI_API_KEY || '');
 
   useEffect(() => {
@@ -31,6 +32,12 @@ function App() {
     }
   }, []);
 
+  const toggleUnit = () => {
+    const newUnit = unit === 'lbs' ? 'kg' : 'lbs';
+    setUnit(newUnit);
+    localStorage.setItem('preferred_unit', newUnit);
+  };
+
   const handleSaveApiKey = (key: string) => {
     localStorage.setItem('gemini_api_key', key);
     setApiKey(key);
@@ -39,17 +46,17 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard unit={unit} />;
       case 'logger':
-        return <WorkoutLogger />;
+        return <WorkoutLogger unit={unit} />;
       case 'chat':
         return <AIChat apiKey={apiKey} onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
       default:
-        return <Dashboard />;
+        return <Dashboard unit={unit} />;
     }
   };
 
-const APP_VERSION = 'v1.1.2';
+const APP_VERSION = 'v1.1.3';
 
   return (
     <>
@@ -64,7 +71,24 @@ const APP_VERSION = 'v1.1.2';
               {APP_VERSION}
             </span>
           </div>
-          <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700, marginTop: '0.5rem' }}>🐾 No Pain No Cute 🐾</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+            <p className="header-subtitle" style={{ color: 'var(--accent-hover)', fontWeight: 700, margin: 0 }}>🐾 No Pain No Cute 🐾</p>
+            <button 
+              onClick={toggleUnit}
+              style={{
+                background: 'rgba(255,255,255,0.5)',
+                border: '1px solid var(--accent-primary)',
+                color: 'var(--accent-primary)',
+                borderRadius: '12px',
+                padding: '0.1rem 0.5rem',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              単位: {unit}
+            </button>
+          </div>
         </div>
         
         <nav className="header-nav">

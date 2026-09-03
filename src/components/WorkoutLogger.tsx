@@ -18,7 +18,11 @@ const EXERCISE_SUGGESTIONS: Record<string, string[]> = {
   '肩・腕': ['ショルダープレス', 'サイドレイズ', 'プリーチャーカール', 'ケーブルプレスダウン'], // 過去データ互換用
   '全身': ['バーピー', 'クリーン', 'スナッチ'],
 };
-const WorkoutLogger: React.FC = () => {
+interface WorkoutLoggerProps {
+  unit?: 'lbs' | 'kg';
+}
+
+const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs' }) => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingIds, setEditingIds] = useState<Record<string, boolean>>({});
@@ -461,7 +465,7 @@ const WorkoutLogger: React.FC = () => {
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, width: '16px' }}>{sIndex + 1}.</span>
                             <input
                               type="text"
-                              placeholder="kg"
+                              placeholder={unit}
                               value={set.weight}
                               onChange={e => handleUpdateSet(workout.id, exercise.id, sIndex, 'weight', e.target.value)}
                               style={{ width: '60px', padding: '0.4rem', fontSize: '0.95rem', textAlign: 'center' }}

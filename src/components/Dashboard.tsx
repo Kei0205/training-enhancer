@@ -6,7 +6,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 import type { DailyWorkout, BodyWeightLog } from '../types';
 import { fetchWorkouts, fetchWeights, saveWeight } from '../utils/supabaseApi';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  unit?: 'lbs' | 'kg';
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [weights, setWeights] = useState<BodyWeightLog[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -125,7 +129,7 @@ const Dashboard: React.FC = () => {
       text += `[${workout.bodyPart}]\n`;
       workout.exercises.forEach(ex => {
         if (!ex.name) return;
-        const setsText = ex.sets.map(s => `${s.weight}kg×${s.reps}`).join(', ');
+        const setsText = ex.sets.map(s => `${s.weight}${unit}×${s.reps}`).join(', ');
         text += `- ${ex.name}: ${setsText}\n`;
       });
       text += '\n';
@@ -448,7 +452,7 @@ const Dashboard: React.FC = () => {
       <div className="glass-card" style={{ padding: '2rem 1.5rem', marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>トレーニングボリューム</h3>
         <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-          {totalWeeklyVolume.toLocaleString()} <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>kg</span>
+          {totalWeeklyVolume.toLocaleString()} <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unit}</span>
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>選択した週の合計</p>
         
@@ -458,7 +462,7 @@ const Dashboard: React.FC = () => {
               <Tooltip 
                 cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }}
-                formatter={(value: any) => [`${value} kg`, 'Volume']}
+                formatter={(value: any) => [`${value} ${unit}`, 'Volume']}
               />
               <Bar 
                 dataKey="volume" 
@@ -547,7 +551,7 @@ const Dashboard: React.FC = () => {
                 <YAxis domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }}
-                  formatter={(value: any) => [`${value} kg`, 'Weight']}
+                  formatter={(value: any) => [`${value} ${unit}`, 'Weight']}
                 />
                 <Line 
                   type="monotone" 
@@ -587,7 +591,7 @@ const Dashboard: React.FC = () => {
                 style={{ flex: 1, fontSize: '1.5rem', textAlign: 'center', padding: '0.75rem' }}
                 autoFocus
               />
-              <span style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)' }}>kg</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unit}</span>
             </div>
             <div style={{ display: 'flex', gap: '1rem' }}>
               <button 
