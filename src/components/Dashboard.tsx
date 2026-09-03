@@ -117,6 +117,35 @@ const Dashboard: React.FC = () => {
   }, [selectedDate]);
 
   // Volume Calculation
+  const handleShare = async () => {
+    if (selectedWorkouts.length === 0) return;
+    
+    let text = `${format(selectedDate, 'yyyy/MM/dd')} のトレーニング記録\n\n`;
+    selectedWorkouts.forEach(workout => {
+      text += `[${workout.bodyPart}]\n`;
+      workout.exercises.forEach(ex => {
+        if (!ex.name) return;
+        const setsText = ex.sets.map(s => `${s.weight}kg×${s.reps}`).join(', ');
+        text += `- ${ex.name}: ${setsText}\n`;
+      });
+      text += '\n';
+    });
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Training Record',
+          text: text
+        });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert('クリップボードにコピーしました！');
+      }
+    } catch (e) {
+      console.error('Error sharing:', e);
+    }
+  };
+
   const calculateVolume = (workout: DailyWorkout) => {
     if (!workout || !Array.isArray(workout.exercises)) return 0;
     return workout.exercises.reduce((total, ex) => {
@@ -138,11 +167,12 @@ const Dashboard: React.FC = () => {
   const volumeChartData = useMemo(() => {
     return selectedWeekDays.map(date => {
       const dStr = format(date, 'yyyy-MM-dd');
-      const w = Array.isArray(workouts) ? workouts.find(wo => wo.date === dStr) : undefined;
+      const dayWorkouts = Array.isArray(workouts) ? workouts.filter(wo => wo.date === dStr) : [];
+      const volume = dayWorkouts.reduce((sum, wo) => sum + calculateVolume(wo), 0);
       return {
         dateStr: dStr,
         dayName: format(date, 'E', { locale: ja }),
-        volume: w ? calculateVolume(w) : 0,
+        volume: volume,
         isToday: isSameDay(date, new Date()),
         isSelected: isSameDay(date, selectedDate)
       };
@@ -454,7 +484,7 @@ const Dashboard: React.FC = () => {
             <span style={{ fontSize: '1.5rem' }}>💪</span>
             {isSameDay(selectedDate, new Date()) ? '今日のトレーニング' : `${format(selectedDate, 'M/d')}のトレーニング`}
           </h3>
-          <button className="action-button secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', borderRadius: 'var(--radius-full)' }}>
+          <button className="action-button secondary" onClick={handleShare} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', borderRadius: 'var(--radius-full)' }}>
             <Share2 size={16} style={{ marginRight: '0.25rem' }} /> シェア
           </button>
         </div>

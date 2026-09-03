@@ -27,7 +27,13 @@ const WorkoutLogger: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const toggleEdit = (id: string) => setEditingIds(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleEdit = async (id: string) => {
+    if (editingIds[id]) {
+      const target = workouts.find(w => w.id === id);
+      if (target) await saveWorkout(target);
+    }
+    setEditingIds(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     loadWorkouts();
@@ -38,7 +44,7 @@ const WorkoutLogger: React.FC = () => {
     setWorkouts(data);
   };
 
-  const generateId = () => Math.random().toString(36).substring(2, 9);
+  const generateId = () => crypto.randomUUID();
 
   const handleAddWorkout = async () => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
@@ -72,15 +78,13 @@ const WorkoutLogger: React.FC = () => {
       return w;
     });
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
+    
   };
 
   const handleUpdateWorkout = async (workoutId: string, field: 'date' | 'bodyPart', value: string) => {
     const updated = workouts.map(w => w.id === workoutId ? { ...w, [field]: value } : w);
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
+    
   };
 
   const handleUpdateExercise = async (workoutId: string, exerciseId: string, name: string) => {
@@ -94,8 +98,7 @@ const WorkoutLogger: React.FC = () => {
       return w;
     });
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
+    
   };
 
   const handleUpdateSet = async (workoutId: string, exerciseId: string, setIndex: number, field: 'weight' | 'reps', value: string) => {
@@ -116,8 +119,7 @@ const WorkoutLogger: React.FC = () => {
       return w;
     });
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
+    
   };
 
   const handleAddSet = async (workoutId: string, exerciseId: string) => {
@@ -137,11 +139,11 @@ const WorkoutLogger: React.FC = () => {
       return w;
     });
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
+    
   };
 
   const handleDeleteExercise = async (workoutId: string, exerciseId: string) => {
+    if (!window.confirm("この種目を削除してもよろしいですか？")) return;
     const updated = workouts.map(w => {
       if (w.id === workoutId) {
         return {
@@ -152,13 +154,11 @@ const WorkoutLogger: React.FC = () => {
       return w;
     });
     setWorkouts(updated);
-    const target = updated.find(w => w.id === workoutId);
-    if (target) await saveWorkout(target);
   };
 
   const generateAIFormat = (workout: DailyWorkout) => {
-    const dateObj = new Date(workout.date);
-    const dateStr = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
+    const [, month, day] = workout.date.split('-');
+    const dateStr = `${parseInt(month, 10)}/${parseInt(day, 10)}`;
     
     let text = `${dateStr}${workout.bodyPart}\n`;
     
@@ -461,7 +461,7 @@ const WorkoutLogger: React.FC = () => {
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, width: '16px' }}>{sIndex + 1}.</span>
                             <input
                               type="text"
-                              placeholder="lbs"
+                              placeholder="kg"
                               value={set.weight}
                               onChange={e => handleUpdateSet(workout.id, exercise.id, sIndex, 'weight', e.target.value)}
                               style={{ width: '60px', padding: '0.4rem', fontSize: '0.95rem', textAlign: 'center' }}

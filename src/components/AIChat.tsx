@@ -80,7 +80,7 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest', systemInstruction: AI_SYSTEM_PROMPT });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash', systemInstruction: AI_SYSTEM_PROMPT });
 
       const todayString = new Date().toLocaleDateString('ja-JP', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
       let workoutContext = `システム情報：本日の日付は ${todayString} です。何日前のトレーニングかなどを計算する際の絶対的な基準としてください。\n\n【最近のトレーニング記録】\n`;
@@ -227,8 +227,23 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
         <AlertCircle size={48} style={{ color: 'var(--warning)', margin: '0 auto 1rem' }} />
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>API Key Required</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          Please go to Settings and enter your Gemini API Key to use the AI Trainer.
+          Google Gemini API Key が必要です。
         </p>
+        <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', maxWidth: '400px', margin: '0 auto', background: 'rgba(255,255,255,0.9)' }}>
+          <input 
+            type="password" 
+            placeholder="AIzaSy..." 
+            style={{ width: '100%', marginBottom: '1rem', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc' }}
+            onChange={(e) => {
+              if (e.target.value.length > 30 && onSaveApiKey) {
+                onSaveApiKey(e.target.value);
+              }
+            }}
+          />
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+            入力すると自動的に保存されます。
+          </p>
+        </div>
       </div>
     );
   }
@@ -320,26 +335,7 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
               </div>
             </div>
           )}
-        {!apiKey && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-            <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', maxWidth: '400px', background: 'rgba(255,255,255,0.9)' }}>
-              <h4 style={{ margin: '0 0 1rem 0' }}>Google Gemini API Key が必要です</h4>
-              <input 
-                type="password" 
-                placeholder="AIzaSy..." 
-                style={{ width: '100%', marginBottom: '1rem', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc' }}
-                onChange={(e) => {
-                  if (e.target.value.length > 30 && onSaveApiKey) {
-                    onSaveApiKey(e.target.value);
-                  }
-                }}
-              />
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                入力すると自動的に保存されます。
-              </p>
-            </div>
-          </div>
-        )}
+
           <div ref={messagesEndRef} />
         </div>
 
