@@ -596,6 +596,8 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
             <div style={{ display: 'flex', gap: '1rem' }}>
               <button 
                 onClick={() => setIsWeightModalOpen(false)}
+          onKeyDown={(e) => { if(e.key === 'Escape') setIsWeightModalOpen(false); }}
+          tabIndex={-1}
                 className="action-button secondary" 
                 style={{ flex: 1 }}
               >

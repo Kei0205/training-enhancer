@@ -26,10 +26,9 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
 
   useEffect(() => {
     const saved = localStorage.getItem('ai_chat_history');
-    const savedDate = localStorage.getItem('ai_chat_date');
     const today = new Date().toLocaleDateString('ja-JP');
 
-    if (saved && savedDate === today) {
+    if (saved) {
       try {
         setMessages(JSON.parse(saved));
       } catch (e) {
