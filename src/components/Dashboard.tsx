@@ -548,12 +548,22 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
               <LineChart data={weightChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} dy={10} />
-                <YAxis domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                <YAxis yAxisId="left" domain={['dataMin - 2', 'dataMax + 2']} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  domain={['dataMin - 2', 'dataMax + 2']} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fill: 'var(--text-muted)' }} 
+                  tickFormatter={(val) => unit === 'lbs' ? (val * 0.453592).toFixed(1) + 'kg' : (val * 2.20462).toFixed(1) + 'lbs'}
+                />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }}
                   formatter={(value: any) => [`${value} ${unit}`, 'Weight']}
                 />
                 <Line 
+                  yAxisId="left"
                   type="monotone" 
                   dataKey="weight" 
                   stroke="var(--accent-primary)" 
@@ -561,6 +571,7 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
                   dot={{ r: 4, fill: 'var(--accent-primary)', strokeWidth: 2, stroke: 'white' }}
                   activeDot={{ r: 6 }}
                 />
+                <Line yAxisId="right" type="monotone" dataKey="weight" stroke="none" dot={false} activeDot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
