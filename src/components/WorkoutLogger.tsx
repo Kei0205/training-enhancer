@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Copy, Check, Dumbbell, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, Copy, Check, Dumbbell, ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
 import type { DailyWorkout } from '../types';
 import { fetchWorkouts, saveWorkout, deleteWorkout } from '../utils/supabaseApi';
@@ -143,7 +143,24 @@ const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs' }) => {
       return w;
     });
     setWorkouts(updated);
-    
+  };
+
+  const handleDeleteSet = async (workoutId: string, exerciseId: string, setIndex: number) => {
+    const updated = workouts.map(w => {
+      if (w.id === workoutId) {
+        return {
+          ...w,
+          exercises: w.exercises.map(e => {
+            if (e.id === exerciseId) {
+              return { ...e, sets: e.sets.filter((_, i) => i !== setIndex) };
+            }
+            return e;
+          })
+        };
+      }
+      return w;
+    });
+    setWorkouts(updated);
   };
 
   const handleDeleteExercise = async (workoutId: string, exerciseId: string) => {
@@ -478,6 +495,15 @@ const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs' }) => {
                               onChange={e => handleUpdateSet(workout.id, exercise.id, sIndex, 'reps', e.target.value)}
                               style={{ width: '60px', padding: '0.4rem', fontSize: '0.95rem', textAlign: 'center' }}
                             />
+                            {exercise.sets.length > 1 && (
+                              <button 
+                                onClick={() => handleDeleteSet(workout.id, exercise.id, sIndex)}
+                                style={{ background: 'transparent', padding: '2px', marginLeft: '2px', color: 'var(--text-muted)' }}
+                                title="Remove Set"
+                              >
+                                <X size={16} />
+                              </button>
+                            )}
                           </div>
                         ))}
                         <button 
