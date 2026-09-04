@@ -43,12 +43,14 @@ function App() {
     setApiKey(key);
   };
 
+  const [targetDate, setTargetDate] = useState<Date>(new Date());
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard unit={unit} />;
+        return <Dashboard unit={unit} onNavigateToLogger={(date) => { setTargetDate(date); setActiveTab('logger'); }} />;
       case 'logger':
-        return <WorkoutLogger unit={unit} />;
+        return <WorkoutLogger unit={unit} initialDate={targetDate} />;
       case 'chat':
         return <AIChat apiKey={apiKey} onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
       default:
@@ -56,7 +58,7 @@ function App() {
     }
   };
 
-const APP_VERSION = 'v1.1.10';
+const APP_VERSION = 'v1.1.11';
 
   return (
     <>

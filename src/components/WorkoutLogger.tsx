@@ -20,16 +20,17 @@ const EXERCISE_SUGGESTIONS: Record<string, string[]> = {
 };
 interface WorkoutLoggerProps {
   unit?: 'lbs' | 'kg';
+  initialDate?: Date;
 }
 
-const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs' }) => {
+const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs', initialDate }) => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingIds, setEditingIds] = useState<Record<string, boolean>>({});
   
   // Calendar state
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(initialDate || new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate || new Date());
 
   const toggleEdit = async (id: string) => {
     if (editingIds[id]) {

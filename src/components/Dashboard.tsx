@@ -8,9 +8,10 @@ import { fetchWorkouts, fetchWeights, saveWeight } from '../utils/supabaseApi';
 
 interface DashboardProps {
   unit?: 'lbs' | 'kg';
+  onNavigateToLogger?: (date: Date) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
+const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger }) => {
   const [workouts, setWorkouts] = useState<DailyWorkout[]>([]);
   const [weights, setWeights] = useState<BodyWeightLog[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -501,6 +502,13 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
                     {workout.date.replace(/-/g, '/')} <span style={{ color: 'var(--accent-hover)', marginLeft: '0.5rem' }}>[{workout.bodyPart}]</span>
                   </h3>
+                  <button 
+                    className="action-button secondary" 
+                    onClick={() => onNavigateToLogger && onNavigateToLogger(selectedDate)}
+                    style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem', borderRadius: 'var(--radius-full)' }}
+                  >
+                    編集
+                  </button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {workout.exercises.length === 0 ? (
