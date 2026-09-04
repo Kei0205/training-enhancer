@@ -242,9 +242,9 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
       
       if (daysSinceWeight === 0) {
         hasLoggedWeightToday = true;
-        weightMsg = `今日の体重は ${lastWeight.weight}kg ですね。バッチリ記録できています！`;
+        weightMsg = `今日の体重は ${lastWeight.weight}${unit} ですね。バッチリ記録できています！`;
       } else if (daysSinceWeight <= 3) {
-        weightMsg = `前回は${daysSinceWeight}日前に ${lastWeight.weight}kg でした。今日も忘れず測りましょう！`;
+        weightMsg = `前回は${daysSinceWeight}日前に ${lastWeight.weight}${unit} でした。今日も忘れず測りましょう！`;
       } else {
         weightMsg = `体重を${daysSinceWeight}日間測っていません！現状を把握するためにも、今日測ってみませんか？`;
       }
