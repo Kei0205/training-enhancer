@@ -638,7 +638,7 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs' }) => {
             全てのデータをスマホ本体にファイルとして保存します。
           </p>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <button className="action-button primary" onClick={handleExportData} style={{ background: '#0ea5e9', borderColor: '#0ea5e9' }}>
+            <button className="action-button secondary" onClick={handleExportData} style={{ color: '#0ea5e9', borderColor: 'rgba(14,165,233,0.3)', fontWeight: 600 }}>
               <Download size={18} />
               ファイルに保存
             </button>

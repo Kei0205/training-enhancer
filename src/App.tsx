@@ -56,7 +56,7 @@ function App() {
     }
   };
 
-const APP_VERSION = 'v1.1.8';
+const APP_VERSION = 'v1.1.9';
 
   return (
     <>
