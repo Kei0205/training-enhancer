@@ -411,8 +411,8 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
               </button>
               <button 
                 onClick={confirmClearChat}
-                className="action-button primary" 
-                style={{ flex: 1, backgroundColor: 'var(--warning)', borderColor: 'var(--warning)' }}
+                className="action-button secondary" 
+                style={{ flex: 1, color: 'var(--warning)', borderColor: 'rgba(244, 63, 94, 0.3)', fontWeight: 600 }}
               >
                 削除
               </button>
