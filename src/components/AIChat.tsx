@@ -79,7 +79,7 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash', systemInstruction: AI_SYSTEM_PROMPT });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash', systemInstruction: AI_SYSTEM_PROMPT });
 
       const todayString = new Date().toLocaleDateString('ja-JP', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
       let workoutContext = `システム情報：本日の日付は ${todayString} です。何日前のトレーニングかなどを計算する際の絶対的な基準としてください。\n\n【最近のトレーニング記録】\n`;
