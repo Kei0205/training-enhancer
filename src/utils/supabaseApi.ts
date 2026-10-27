@@ -170,7 +170,7 @@ export const saveWeight = async (weightLog: import('../types').BodyWeightLog): P
       id: weightLog.id,
       date: weightLog.date,
       weight: weightLog.weight
-    }, { onConflict: 'date' }); // Use date as unique conflict key
+    }, { onConflict: 'id' }); // Callers reuse the existing id when editing a date's record
 
   const local = getLocalWeights();
   const existingIndex = local.findIndex(w => w.date === weightLog.date);

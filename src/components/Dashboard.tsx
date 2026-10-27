@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Share2, Plus, Calendar as CalendarIcon, LayoutList, Download, FileUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Plus, Pencil,Calendar as CalendarIcon, LayoutList, Download, FileUp } from 'lucide-react';
 import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, subMonths, addMonths, subWeeks, addWeeks, parseISO, isValid } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from 'recharts';
 import type { DailyWorkout, BodyWeightLog } from '../types';
-import { fetchWorkouts, fetchWeights, saveWeight } from '../utils/supabaseApi';
+import { fetchWorkouts, fetchWeights, saveWeight, deleteWeight } from '../utils/supabaseApi';
 
 interface DashboardProps {
   unit?: 'lbs' | 'kg';
@@ -22,6 +22,7 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
   
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
   const [newWeight, setNewWeight] = useState('');
+  const [weightModalDate, setWeightModalDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const loadData = async () => {
@@ -199,23 +200,55 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
     });
   }, [weights]);
 
+  const editingWeightLog = useMemo(() => {
+    const dStr = format(weightModalDate, 'yyyy-MM-dd');
+    return weights.find(w => w.date === dStr);
+  }, [weights, weightModalDate]);
+
+  // Opens the weight modal for the given date, prefilled with the existing record if any
+  const openWeightModal = (date: Date) => {
+    const existing = weights.find(w => w.date === format(date, 'yyyy-MM-dd'));
+    setWeightModalDate(date);
+    setNewWeight(existing ? String(existing.weight) : '');
+    setIsWeightModalOpen(true);
+  };
+
+  const closeWeightModal = () => {
+    setIsWeightModalOpen(false);
+    setNewWeight('');
+  };
+
   const handleSaveWeight = async () => {
     if (!newWeight) return;
     const w = parseFloat(newWeight);
     if (isNaN(w)) return;
-    
+
     const newLog: BodyWeightLog = {
-      id: Date.now().toString(),
-      date: format(selectedDate, 'yyyy-MM-dd'),
+      id: editingWeightLog?.id ?? Date.now().toString(),
+      date: format(weightModalDate, 'yyyy-MM-dd'),
       weight: w
     };
-    
+
     const success = await saveWeight(newLog);
     if (success) {
       const updated = await fetchWeights();
       setWeights(updated);
-      setIsWeightModalOpen(false);
-      setNewWeight('');
+      closeWeightModal();
+    } else {
+      alert('体重の保存に失敗しました。通信状況を確認してもう一度お試しください。');
+    }
+  };
+
+  const handleDeleteWeight = async () => {
+    if (!editingWeightLog) return;
+    if (!window.confirm(`${format(weightModalDate, 'M/d')} の体重記録を削除しますか？`)) return;
+    const success = await deleteWeight(editingWeightLog.id);
+    if (success) {
+      const updated = await fetchWeights();
+      setWeights(updated);
+      closeWeightModal();
+    } else {
+      alert('体重の削除に失敗しました。');
     }
   };
 
@@ -316,19 +349,17 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
           </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <span>{aiMessage.weightMsg}</span>
-            {!aiMessage.hasLoggedWeightToday && (
-              <button 
-                onClick={() => setIsWeightModalOpen(true)}
-                style={{ 
-                  background: 'var(--accent-primary)', color: 'white', border: 'none', 
-                  padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', 
-                  fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
-                  boxShadow: '0 2px 4px rgba(56, 189, 248, 0.3)'
-                }}
-              >
-                📝 記録する
-              </button>
-            )}
+            <button
+              onClick={() => openWeightModal(new Date())}
+              style={{
+                background: 'var(--accent-primary)', color: 'white', border: 'none',
+                padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)',
+                fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(56, 189, 248, 0.3)'
+              }}
+            >
+              {aiMessage.hasLoggedWeightToday ? '✏️ 編集する' : '📝 記録する'}
+            </button>
           </div>
         </div>
       </div>
@@ -541,12 +572,14 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
             <span style={{ fontSize: '1.5rem' }}>🐈</span>
             体重推移
           </h3>
-          <button 
-            onClick={() => setIsWeightModalOpen(true)}
-            className="action-button primary" 
+          <button
+            onClick={() => openWeightModal(selectedDate)}
+            className="action-button primary"
             style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', borderRadius: 'var(--radius-full)' }}
           >
-            <Plus size={16} style={{ marginRight: '0.25rem' }} /> 記録
+            {weights.some(w => w.date === format(selectedDate, 'yyyy-MM-dd'))
+              ? <><Pencil size={16} style={{ marginRight: '0.25rem' }} /> {format(selectedDate, 'M/d')}を編集</>
+              : <><Plus size={16} style={{ marginRight: '0.25rem' }} /> 記録</>}
           </button>
         </div>
 
@@ -599,7 +632,7 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
           backdropFilter: 'blur(4px)'
         }}>
           <div className="glass-card" style={{ width: '90%', maxWidth: '400px', padding: '2rem' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '1.5rem', textAlign: 'center' }}>体重を記録 ({format(selectedDate, 'M/d')})</h3>
+            <h3 style={{ marginTop: 0, marginBottom: '1.5rem', textAlign: 'center' }}>{editingWeightLog ? '体重を編集' : '体重を記録'} ({format(weightModalDate, 'M/d')})</h3>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
               <input 
                 type="number" 
@@ -607,17 +640,19 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
                 placeholder="0.0"
                 value={newWeight}
                 onChange={e => setNewWeight(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleSaveWeight();
+                  if (e.key === 'Escape') closeWeightModal();
+                }}
                 style={{ flex: 1, fontSize: '1.5rem', textAlign: 'center', padding: '0.75rem' }}
                 autoFocus
               />
               <span style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unit}</span>
             </div>
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <button 
-                onClick={() => setIsWeightModalOpen(false)}
-          onKeyDown={(e) => { if(e.key === 'Escape') setIsWeightModalOpen(false); }}
-          tabIndex={-1}
-                className="action-button secondary" 
+              <button
+                onClick={closeWeightModal}
+                className="action-button secondary"
                 style={{ flex: 1 }}
               >
                 キャンセル
@@ -630,6 +665,15 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
                 保存
               </button>
             </div>
+            {editingWeightLog && (
+              <button
+                onClick={handleDeleteWeight}
+                className="action-button secondary"
+                style={{ width: '100%', marginTop: '1rem', color: 'var(--warning)', borderColor: 'rgba(244, 63, 94, 0.3)' }}
+              >
+                この記録を削除
+              </button>
+            )}
           </div>
         </div>
       )}
