@@ -52,13 +52,13 @@ function App() {
       case 'logger':
         return <WorkoutLogger unit={unit} initialDate={targetDate} />;
       case 'chat':
-        return <AIChat apiKey={apiKey} onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
+        return <AIChat apiKey={apiKey} unit={unit}onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
       default:
         return <Dashboard unit={unit} />;
     }
   };
 
-const APP_VERSION = 'v1.1.13';
+const APP_VERSION = 'v1.1.14';
 
   return (
     <>

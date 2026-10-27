@@ -4,9 +4,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AI_SYSTEM_PROMPT } from '../constants';
 import { parseAIWorkoutText } from '../utils/parser';
 import { fetchWorkouts, fetchWeights, saveWorkout } from '../utils/supabaseApi';
+import { buildTrainingContext } from '../utils/aiContext';
 
 interface AIChatProps {
   apiKey: string;
+  unit?: 'lbs' | 'kg';
   onNavigateToLogger: () => void;
   onSaveApiKey?: (key: string) => void;
 }
@@ -16,7 +18,7 @@ interface Message {
   content: string;
 }
 
-const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKey }) => {
+const AIChat: React.FC<AIChatProps> = ({ apiKey, unit = 'lbs', onNavigateToLogger, onSaveApiKey }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,39 +84,10 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, onNavigateToLogger, onSaveApiKe
       const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash', systemInstruction: AI_SYSTEM_PROMPT });
 
       const todayString = new Date().toLocaleDateString('ja-JP', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-      let workoutContext = `システム情報：本日の日付は ${todayString} です。何日前のトレーニングかなどを計算する際の絶対的な基準としてください。\n\n【最近のトレーニング記録】\n`;
+      let workoutContext = `システム情報：本日の日付は ${todayString} です。何日前のトレーニングかなどを計算する際の絶対的な基準としてください。\n\n`;
       try {
-        const workouts = await fetchWorkouts();
-        // Sort workouts by date descending (newest first)
-        const sortedWorkouts = [...workouts].sort((a, b) => {
-          const dA = new Date(a.date).getTime();
-          const dB = new Date(b.date).getTime();
-          return (isNaN(dB) ? 0 : dB) - (isNaN(dA) ? 0 : dA);
-        });
-        const recentWorkouts = sortedWorkouts.slice(0, 5);
-        if (recentWorkouts.length > 0) {
-          workoutContext += recentWorkouts.map(w => {
-            let text = `${w.date} ${w.bodyPart}\n`;
-            w.exercises.forEach(ex => {
-              if(ex.name) {
-                 text += `${ex.name}: ` + ex.sets.map(s => `${s.weight}*${s.reps}`).join(', ') + '\n';
-              }
-            });
-            return text;
-          }).join('\n');
-        } else {
-          workoutContext += 'まだ記録がありません。\n';
-        }
-        
-        const weights = await fetchWeights();
-        if (weights && weights.length > 0) {
-           const sortedWeights = [...weights].sort((a, b) => {
-             const dA = new Date(a.date).getTime();
-             const dB = new Date(b.date).getTime();
-             return (isNaN(dB) ? 0 : dB) - (isNaN(dA) ? 0 : dA);
-           });
-           workoutContext += `\n【最近の体重記録】\n直近の体重: ${sortedWeights[0].date} に ${sortedWeights[0].weight}kg\n`;
-        }
+        const [workouts, weights] = await Promise.all([fetchWorkouts(), fetchWeights()]);
+        workoutContext += buildTrainingContext(workouts, weights || [], unit);
       } catch (e) {
         workoutContext += '記録の読み込みエラー\n';
       }
