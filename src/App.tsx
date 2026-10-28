@@ -21,7 +21,7 @@ function App() {
     }
 
     // 自動で毎日の初回起動時にバックアップを取る（前日の状態を保存）
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD (toISOString is UTC)
     const lastBackupDate = localStorage.getItem('auto_backup_date');
     if (lastBackupDate !== today) {
       const currentWorkouts = localStorage.getItem('training_workouts') || '[]';
@@ -52,13 +52,13 @@ function App() {
       case 'logger':
         return <WorkoutLogger unit={unit} initialDate={targetDate} />;
       case 'chat':
-        return <AIChat apiKey={apiKey} unit={unit}onNavigateToLogger={() => setActiveTab('logger')} onSaveApiKey={handleSaveApiKey} />;
+        return <AIChat apiKey={apiKey} unit={unit} onNavigateToLogger={(date) => { setTargetDate(date); setActiveTab('logger'); }}onSaveApiKey={handleSaveApiKey} />;
       default:
         return <Dashboard unit={unit} />;
     }
   };
 
-const APP_VERSION = 'v1.1.14';
+const APP_VERSION = 'v1.1.15';
 
   return (
     <>

@@ -4,7 +4,7 @@ import { format, addDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, each
 import { ja } from 'date-fns/locale';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Cell } from 'recharts';
 import type { DailyWorkout, BodyWeightLog } from '../types';
-import { fetchWorkouts, fetchWeights, saveWeight, deleteWeight } from '../utils/supabaseApi';
+import { fetchWorkouts, fetchWeights, saveWeight, deleteWeight, restoreBackupData } from '../utils/supabaseApi';
 
 interface DashboardProps {
   unit?: 'lbs' | 'kg';
@@ -70,14 +70,17 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
     }).length;
   }, [workouts, currentMonthStart]);
 
-  const handleRestoreAutoBackup = () => {
+  const handleRestoreAutoBackup = async () => {
     const workouts = localStorage.getItem('auto_backup_workouts');
     const weights = localStorage.getItem('auto_backup_weights');
     const date = localStorage.getItem('auto_backup_date');
     if (!workouts && !weights) { alert('自動バックアップデータがありません。明日以降に利用可能になります。'); return; }
     if (window.confirm(`前回の起動時（${date}）のデータを復元しますか？\n⚠️現在のデータは上書きされ、間違えて消してしまった直前の状態に戻せます。`)) {
-      if (workouts) localStorage.setItem('training_workouts', workouts);
-      if (weights) localStorage.setItem('training_weights', weights);
+      const success = await restoreBackupData(
+        workouts ? JSON.parse(workouts) : undefined,
+        weights ? JSON.parse(weights) : undefined
+      );
+      if (!success) { alert('サーバーへの復元に失敗しました。通信状況を確認してもう一度お試しください。'); return; }
       alert('自動バックアップから復元しました！ページをリロードします。');
       window.location.reload();
     }
@@ -102,16 +105,18 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
+      let data;
       try {
-        const data = JSON.parse(event.target?.result as string);
-        if (data.workouts) localStorage.setItem('training_workouts', JSON.stringify(data.workouts));
-        if (data.weights) localStorage.setItem('training_weights', JSON.stringify(data.weights));
-        alert('データをインポートしました！ページをリロードします。');
-        window.location.reload();
-      } catch (err) {
+        data = JSON.parse(event.target?.result as string);
+      } catch {
         alert('不正なバックアップファイルです。');
+        return;
       }
+      const success = await restoreBackupData(data.workouts, data.weights);
+      if (!success) { alert('サーバーへの復元に失敗しました。通信状況を確認してもう一度お試しください。'); return; }
+      alert('データをインポートしました！ページをリロードします。');
+      window.location.reload();
     };
     reader.readAsText(file);
   };
@@ -299,7 +304,7 @@ const Dashboard: React.FC<DashboardProps> = ({ unit = 'lbs', onNavigateToLogger 
     }
 
     return { weightMsg, workoutMsg, hasLoggedWeightToday };
-  }, [weights, workouts]);
+  }, [weights, workouts, unit]);
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>

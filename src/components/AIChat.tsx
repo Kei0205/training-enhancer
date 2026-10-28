@@ -5,11 +5,12 @@ import { AI_SYSTEM_PROMPT } from '../constants';
 import { parseAIWorkoutText } from '../utils/parser';
 import { fetchWorkouts, fetchWeights, saveWorkout } from '../utils/supabaseApi';
 import { buildTrainingContext } from '../utils/aiContext';
+import { parseISO } from 'date-fns';
 
 interface AIChatProps {
   apiKey: string;
   unit?: 'lbs' | 'kg';
-  onNavigateToLogger: () => void;
+  onNavigateToLogger: (date: Date) => void;
   onSaveApiKey?: (key: string) => void;
 }
 
@@ -19,33 +20,25 @@ interface Message {
 }
 
 const AIChat: React.FC<AIChatProps> = ({ apiKey, unit = 'lbs', onNavigateToLogger, onSaveApiKey }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Load history synchronously so the save effect below never overwrites it with []
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('ai_chat_history') || '[]');
+      if (Array.isArray(saved) && saved.length > 0) return saved;
+    } catch {
+      console.error('Failed to parse chat history');
+    }
+    localStorage.setItem('ai_chat_date', new Date().toLocaleDateString('ja-JP'));
+    return [{
+      role: 'model',
+      content: 'こんにちは、啓太郎さん！本日のトレーニングメニューを作成しますか？「今日のメニューは？」ボタンを押してください。'
+    }];
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('ai_chat_history');
-    const today = new Date().toLocaleDateString('ja-JP');
-
-    if (saved) {
-      try {
-        setMessages(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse chat history');
-      }
-    } else {
-      const initialMessage = {
-        role: 'model' as const,
-        content: 'こんにちは、啓太郎さん！本日のトレーニングメニューを作成しますか？「今日のメニューは？」ボタンを押してください。'
-      };
-      setMessages([initialMessage]);
-      localStorage.setItem('ai_chat_history', JSON.stringify([initialMessage]));
-      localStorage.setItem('ai_chat_date', today);
-    }
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('ai_chat_history', JSON.stringify(messages));
@@ -137,9 +130,9 @@ const AIChat: React.FC<AIChatProps> = ({ apiKey, unit = 'lbs', onNavigateToLogge
 
     const success = await saveWorkout(parsedWorkout);
     if (success) {
-      onNavigateToLogger();
+      onNavigateToLogger(parseISO(parsedWorkout.date));
     } else {
-      setAlertMessage("ワークアウトの保存に失敗しました。");
+      setAlertMessage("ワークアウトの保存に失敗しました。通信状況を確認してもう一度お試しください。");
     }
   };
 

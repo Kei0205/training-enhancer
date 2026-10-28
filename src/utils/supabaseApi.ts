@@ -106,6 +106,49 @@ export const deleteWorkout = async (id: string): Promise<boolean> => {
   return true;
 };
 
+// Writes backup data to Supabase as well as local storage; writing only to
+// local storage is undone by the next fetch, which overwrites it from Supabase.
+export const restoreBackupData = async (
+  workouts: DailyWorkout[] | undefined,
+  weights: import('../types').BodyWeightLog[] | undefined
+): Promise<boolean> => {
+  if (workouts) saveLocalWorkouts(workouts);
+  if (weights) saveLocalWeights(weights);
+
+  const supabase = getSupabase();
+  if (!supabase) return true;
+
+  let ok = true;
+  if (workouts && workouts.length > 0) {
+    const { error } = await supabase
+      .from('workouts')
+      .upsert(workouts.map(w => ({
+        id: w.id,
+        date: w.date,
+        body_part: w.bodyPart,
+        exercises: w.exercises
+      })), { onConflict: 'id' });
+    if (error) {
+      console.error('Error restoring workouts:', error);
+      ok = false;
+    }
+  }
+  if (weights && weights.length > 0) {
+    const { error } = await supabase
+      .from('body_weights')
+      .upsert(weights.map(w => ({
+        id: w.id,
+        date: w.date,
+        weight: w.weight
+      })), { onConflict: 'id' });
+    if (error) {
+      console.error('Error restoring weights:', error);
+      ok = false;
+    }
+  }
+  return ok;
+};
+
 // --- Body Weights ---
 
 const getLocalWeights = (): import('../types').BodyWeightLog[] => {

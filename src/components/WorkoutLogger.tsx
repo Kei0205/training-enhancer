@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Copy, Check, Dumbbell, ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
 import type { DailyWorkout } from '../types';
@@ -44,6 +44,23 @@ const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs', initialDate
     loadWorkouts();
   }, []);
 
+  // Auto-save workouts being edited, so changes aren't lost when leaving without pressing Done
+  const pendingSave = useRef<DailyWorkout[]>([]);
+  useEffect(() => {
+    const editing = workouts.filter(w => editingIds[w.id]);
+    pendingSave.current = editing;
+    if (editing.length === 0) return;
+    const timer = setTimeout(() => {
+      editing.forEach(w => saveWorkout(w));
+      pendingSave.current = [];
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [workouts, editingIds]);
+
+  useEffect(() => () => {
+    pendingSave.current.forEach(w => saveWorkout(w));
+  }, []);
+
   const loadWorkouts = async () => {
     const data = await fetchWorkouts();
     setWorkouts(data);
@@ -68,6 +85,7 @@ const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({ unit = 'lbs', initialDate
 
 
   const handleDeleteWorkout = async (id: string) => {
+    if (!window.confirm("このワークアウトを削除してもよろしいですか？")) return;
     setWorkouts(workouts.filter(w => w.id !== id));
     await deleteWorkout(id);
   };
